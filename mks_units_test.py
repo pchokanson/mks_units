@@ -43,7 +43,7 @@ class TestUnit(unittest.TestCase):
 		
 		# LaTeX formatting
 		my_str = "{0:$3.3f}".format(my_unit)
-		self.assertEqual(my_str, "\SI{1.500}{ kg m s^2 K^-1/2}")
+		self.assertEqual(my_str, r"\SI{1.500}{ kg m s^{2} K^{-1/2}}")
 	
 	def test_non_si(self):
 		my_mpg = Unit(5, "mi gal^-1")

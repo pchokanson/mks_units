@@ -110,15 +110,17 @@ class Unit(object):
 			numformat = split_string[0]
 			
 			numstring = ("%"+numformat) % self.value
-			unitstring = self.units_to_string(self.units)
+			unitstring = self.units_to_string(self.units, latexmode = LaTeXMode)
 			# There is probably a better way to format self.value, but this works
 			# for now.
-			#return ("%"+numformat) % self.value + self.units_to_string(self.units)
 		else:
 			# Divide the unit by the scaled unit, which should produce a unitless
 			# value that is in the desired units
 			numformat, units = split_string
-			scale_unit = self.string_to_scale_unit(units)
+			
+			# We remove "{}" from the string to allow for brackets in TeX formatting
+			scale_unit = self.string_to_scale_unit(units.translate({"{":None,"}":None}))
+			
 			assert((self / scale_unit).units == UNITLESS)
 			scale_value = (self / scale_unit).value
 			
@@ -144,7 +146,7 @@ class Unit(object):
 			return self.value
 	
 	@staticmethod
-	def units_to_string(units):
+	def units_to_string(units, latexmode = False):
 		unit_string = ""
 		for unit, power in zip(BASE_UNITS, units):
 			if power == 0: # This unit isn't present
@@ -152,9 +154,15 @@ class Unit(object):
 			elif power == 1: # Implicit exponent
 				unit_string += " %s" % unit
 			elif isinstance(power, Fraction): # Fraction case
-				unit_string += " %s^%s" % (unit, power)
+				if latexmode:
+					unit_string += " %s^{%s}" % (unit, power)
+				else:
+					unit_string += " %s^%s" % (unit, power)
 			else: # Generic numeric
-				unit_string += " %s^%f" % (unit, power)
+				if latexmode:
+					unit_string += " %s^{%f}" % (unit, power)
+				else:
+					unit_string += " %s^%f" % (unit, power)
 		return unit_string
 	
 	def to_string(self, formatstring="%f"):
