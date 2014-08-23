@@ -118,8 +118,14 @@ class Unit(object):
 			# value that is in the desired units
 			numformat, units = split_string
 			
-			# We remove "{}" from the string to allow for brackets in TeX formatting
-			scale_unit = self.string_to_scale_unit(units.translate({"{":None,"}":None}))
+			# We replace "[]" from the string with "{}" to allow for brackets in TeX formatting
+			#for rep_char in "{}": stripped_units = units.replace(rep_char, "")
+			units = units.replace("[","{")
+			units = units.replace("]","}")
+			stripped_units = units.replace("{","")
+			stripped_units = stripped_units.replace("}","")
+			
+			scale_unit = self.string_to_scale_unit(stripped_units)
 			
 			assert((self / scale_unit).units == UNITLESS)
 			scale_value = (self / scale_unit).value
