@@ -97,15 +97,23 @@ class Unit(object):
 		return self.to_string()
 	
 	def __format__(self, formatstring):
+		# LaTeX mode support: start format string with $
+		# Uses `siunitx` package.  
+		# NOTE: This doesn't easily support fractional units at the present.
+		LaTeXMode = formatstring.startswith("$")
+		formatstring = formatstring.lstrip("$")
+		
 		split_string = formatstring.split(maxsplit=1)
 		if len(split_string) == 0:
 			return self.to_string()
 		if len(split_string) == 1:
 			numformat = split_string[0]
 			
+			numstring = ("%"+numformat) % self.value
+			unitstring = self.units_to_string(self.units)
 			# There is probably a better way to format self.value, but this works
 			# for now.
-			return ("%"+numformat) % self.value + self.units_to_string(self.units)
+			#return ("%"+numformat) % self.value + self.units_to_string(self.units)
 		else:
 			# Divide the unit by the scaled unit, which should produce a unitless
 			# value that is in the desired units
@@ -114,7 +122,13 @@ class Unit(object):
 			assert((self / scale_unit).units == UNITLESS)
 			scale_value = (self / scale_unit).value
 			
-			return ("%"+numformat) % scale_value + (" %s" % units)
+			numstring = ("%"+numformat) % scale_value
+			unitstring = (" %s" % units)
+		
+		if LaTeXMode:
+			return "\SI{%s}{%s}" % (numstring, unitstring)
+		else:
+			return numstring + unitstring
 	
 	def value_as(self, units):
 		"""Return numeric value in given units."""
